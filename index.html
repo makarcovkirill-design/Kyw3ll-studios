@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#101216">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Kyw3ll Studio V8</title>
+<link rel="manifest" href="manifest.json">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:#0b0d10;color:#f3f4f6;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow-x:hidden}
+button,label,input{font:inherit} button{border:0;color:inherit}
+.app{min-height:100vh;padding-bottom:88px}
+.top{position:sticky;top:0;z-index:20;background:rgba(14,16,20,.94);backdrop-filter:blur(18px);padding:12px 14px 10px;border-bottom:1px solid #262a31}
+.brand{font-weight:800;font-size:20px}.brand span{color:#8b5cf6}
+.transport{display:flex;gap:8px;margin-top:10px;align-items:center}
+.btn{min-height:44px;padding:0 14px;border-radius:12px;background:#1b1f26;border:1px solid #30343d;font-weight:700}
+.btn.primary{background:#7c3aed}.btn.rec{background:#b91c1c}.btn:active,.pad:active{transform:scale(.97)}
+.bpm{display:flex;align-items:center;gap:7px;margin-left:auto;background:#15181e;padding:5px 8px;border-radius:11px;border:1px solid #292e37}
+.bpm input{width:55px;background:transparent;border:0;color:white;text-align:center;outline:0;font-weight:800}
+.section{padding:14px}.sectionTitle{font-size:13px;color:#9ca3af;text-transform:uppercase;letter-spacing:.08em;margin:4px 0 10px}
+.tracks{display:flex;flex-direction:column;gap:10px}
+.track{background:#12151a;border:1px solid #272c34;border-radius:16px;overflow:hidden}
+.trackHead{display:flex;align-items:center;padding:10px 12px;gap:10px}
+.dot{width:10px;height:10px;border-radius:50%;background:#8b5cf6}
+.trackName{font-weight:800;flex:1}.mute{min-height:36px;padding:0 11px;border-radius:10px;background:#20242b}
+.lane{height:116px;position:relative;overflow:hidden;background:repeating-linear-gradient(90deg,#101318 0,#101318 49px,#181c22 50px)}
+.grid{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0,transparent 49px,rgba(255,255,255,.045) 50px)}
+.clip{position:absolute;top:15px;height:86px;min-width:150px;border-radius:13px;background:linear-gradient(135deg,#6d28d9,#4338ca);border:1px solid #a78bfa;padding:9px 11px;touch-action:none;user-select:none;box-shadow:0 8px 22px #0006}
+.clip.beat{background:linear-gradient(135deg,#0f766e,#115e59);border-color:#2dd4bf}
+.clip.vocal{background:linear-gradient(135deg,#be123c,#9f1239);border-color:#fb7185}
+.clip.selected{outline:2px solid #fff;outline-offset:2px}
+.clipTitle{font-weight:800;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wave{width:100%;height:48px;margin-top:7px}
+.empty{padding:25px;text-align:center;color:#6b7280}
+.bottom{position:fixed;z-index:30;left:0;right:0;bottom:0;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:rgba(14,16,20,.96);backdrop-filter:blur(18px);border-top:1px solid #272c34;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.nav{background:#171a20;border:1px solid #282d35;border-radius:13px;min-height:48px;font-size:12px;font-weight:700}
+.nav.active{background:#292034;color:#c4b5fd}
+.panel{display:none}.panel.open{display:block}
+.card{background:#12151a;border:1px solid #282d35;border-radius:16px;padding:14px;margin-bottom:10px}
+.controls{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.control{background:#171a20;border-radius:12px;padding:12px}.control label{display:block;font-size:12px;color:#9ca3af;margin-bottom:7px}
+input[type=range]{width:100%;accent-color:#8b5cf6}
+.padgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.pad{aspect-ratio:1;border-radius:14px;background:#1a1e25;border:1px solid #303641;font-weight:800}
+.importBox{display:grid;gap:10px}.fileButton{display:flex;align-items:center;justify-content:center;min-height:52px;border-radius:14px;background:#7c3aed;font-weight:800;text-align:center}
+.hiddenFile{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.fileInfo{padding:12px;border-radius:12px;background:#171a20;color:#cbd5e1;min-height:44px}
+.status{position:fixed;z-index:100;left:50%;bottom:82px;transform:translateX(-50%);background:#e5e7eb;color:#111827;padding:10px 14px;border-radius:12px;font-weight:700;display:none;max-width:90%;text-align:center}
+.status.show{display:block}
+.small{font-size:12px;color:#9ca3af;line-height:1.45}
+h2{font-size:18px;margin:0 0 10px}
+@media(min-width:700px){.app{max-width:900px;margin:auto}.bottom{max-width:900px;left:50%;transform:translateX(-50%);border-radius:18px 18px 0 0}.lane{height:130px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top">
+  <div class="brand">Kyw3ll <span>Studio</span> <small>V8</small></div>
+  <div class="transport">
+    <button class="btn" id="stop">■</button>
+    <button class="btn primary" id="play">▶</button>
+    <button class="btn rec" id="record">● REC</button>
+    <div class="bpm">BPM <input id="bpm" type="number" min="40" max="240" value="120"></div>
+  </div>
+</header>
+
+<main>
+<section id="studioPanel" class="panel open section">
+  <div class="sectionTitle">Timeline</div>
+  <div id="tracks" class="tracks">
+    <div class="empty" id="empty">Нажми «Импорт», чтобы добавить бит.</div>
+  </div>
+</section>
+
+<section id="mixerPanel" class="panel section">
+  <div class="sectionTitle">Mixer</div>
+  <div class="card"><h2>Master</h2><div class="controls">
+    <div class="control"><label>Громкость</label><input id="masterVol" type="range" min="0" max="1" step=".01" value=".85"></div>
+    <div class="control"><label>Pan</label><input id="masterPan" type="range" min="-1" max="1" step=".01" value="0"></div>
+  </div></div>
+  <div class="card"><h2>FX</h2><div class="controls">
+    <div class="control"><label>Reverb</label><input id="reverb" type="range" min="0" max="1" step=".01" value=".2"></div>
+    <div class="control"><label>Delay</label><input id="delay" type="range" min="0" max="1" step=".01" value="0"></div>
+    <div class="control"><label>EQ Low</label><input type="range" min="-12" max="12" value="0"></div>
+    <div class="control"><label>EQ High</label><input type="range" min="-12" max="12" value="0"></div>
+  </div></div>
+</section>
+
+<section id="padsPanel" class="panel section">
+  <div class="sectionTitle">Drum Pads</div>
+  <div class="card"><h2>Quick Beat</h2><div class="padgrid" id="pads"></div><p class="small">Пэды работают через Web Audio. Нажимай по ним.</p></div>
+</section>
+
+<section id="settingsPanel" class="panel section">
+  <div class="sectionTitle">Project</div>
+  <div class="card"><h2>Kyw3ll Studio</h2><p class="small">Версия V8 подготовлена для GitHub Pages. HTTPS нужен для стабильной работы микрофона и локального хранилища.</p><button class="btn primary" id="save">💾 Сохранить проект</button></div>
+</section>
+</main>
+</div>
+
+<nav class="bottom">
+<button class="nav active" data-panel="studioPanel">🎚 Студия</button>
+<button class="nav" id="importBtn">＋ Импорт</button>
+<button class="nav" data-panel="mixerPanel">🎛 Mixer</button>
+<button class="nav" data-panel="padsPanel">🥁 Pads</button>
+</nav>
+
+<div id="status" class="status"></div>
+
+<div id="importPanel" class="panel section" style="position:fixed;inset:auto 0 75px;z-index:50;background:#0f1116;border-top:1px solid #343945;padding:14px;box-shadow:0 -12px 35px #0008">
+  <div class="card">
+    <h2>Импорт аудио</h2>
+    <div class="importBox">
+      <input id="file" class="hiddenFile" type="file" accept="audio/*">
+      <label class="fileButton" for="file">📂 Выбрать аудиофайл</label>
+      <div id="fileInfo" class="fileInfo">Файл ещё не выбран</div>
+      <button class="btn primary" id="addFile" disabled>✅ Добавить на BEAT</button>
+      <button class="btn" id="closeImport">Закрыть</button>
+      <div class="small">На GitHub Pages кнопка открывает настоящий системный выбор файлов iPhone.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+const $=id=>document.getElementById(id);
+let audioCtx=null, master=null, selected=null, clips=[], pendingFile=null, mediaRec=null, recChunks=[];
+
+function status(t){const s=$('status');s.textContent=t;s.classList.add('show');clearTimeout(status.t);status.t=setTimeout(()=>s.classList.remove('show'),1800)}
+function audioInit(){
+  if(!audioCtx){
+    audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    master=audioCtx.createGain(); master.gain.value=+$('masterVol').value; master.connect(audioCtx.destination);
+  }
+  if(audioCtx.state==='suspended') audioCtx.resume();
+}
+$('masterVol').oninput=e=>{audioInit();master.gain.value=+e.target.value};
+
+function drawWave(canvas, buf){
+ const c=canvas.getContext('2d'), w=c.width=canvas.clientWidth*2, h=c.height=canvas.clientHeight*2;
+ c.clearRect(0,0,w,h); c.strokeStyle='rgba(255,255,255,.8)'; c.lineWidth=2;
+ const d=buf.getChannelData(0), step=Math.max(1,Math.floor(d.length/w));
+ c.beginPath();
+ for(let x=0;x<w;x++){let sum=0;for(let j=0;j<step;j++)sum+=Math.abs(d[x*step+j]||0);let y=(sum/step)*h*.42; c.moveTo(x,h/2-y);c.lineTo(x,h/2+y)}
+ c.stroke();
+}
+
+function addClip(file,type='beat'){
+ $('empty')?.remove();
+ const track=document.createElement('div'); track.className='track';
+ const head=document.createElement('div'); head.className='trackHead';
+ head.innerHTML='<span class="dot"></span><span class="trackName"></span><button class="mute">M</button>';
+ head.querySelector('.trackName').textContent=type==='beat'?'BEAT':'VOCAL';
+ const lane=document.createElement('div'); lane.className='lane'; lane.innerHTML='<div class="grid"></div>';
+ const clip=document.createElement('div'); clip.className='clip '+type; clip.style.left='12px'; clip.style.width='min(76vw,520px)';
+ const title=document.createElement('div'); title.className='clipTitle'; title.textContent=file.name;
+ const cv=document.createElement('canvas'); cv.className='wave';
+ clip.append(title,cv); lane.appendChild(clip); track.append(head,lane); $('tracks').appendChild(track);
+ const obj={id:crypto.randomUUID(),file,type,el:clip,lane,audio:null}; clips.push(obj);
+ clip.addEventListener('pointerdown',e=>startDrag(e,obj));
+ file.arrayBuffer().then(b=>audioInitDecode(b,cv,obj)).catch(()=>status('Не удалось прочитать аудио'));
+ selected=obj; clip.classList.add('selected');
+}
+
+async function audioInitDecode(array,cv,obj){
+ try{
+  audioInit(); const b=await audioCtx.decodeAudioData(array.slice(0)); obj.audio=b; drawWave(cv,b);
+ }catch{}
+}
+
+function startDrag(e,obj){
+ e.preventDefault(); selected=obj; clips.forEach(x=>x.el.classList.remove('selected'));obj.el.classList.add('selected');
+ const startX=e.clientX, startLeft=parseFloat(obj.el.style.left)||0;
+ obj.el.setPointerCapture?.(e.pointerId);
+ const move=ev=>{const dx=ev.clientX-startX; obj.el.style.left=Math.max(0,startLeft+dx)+'px'};
+ const up=()=>{obj.el.removeEventListener('pointermove',move);obj.el.removeEventListener('pointerup',up)};
+ obj.el.addEventListener('pointermove',move);obj.el.addEventListener('pointerup',up);
+}
+
+$('importBtn').onclick=()=>{$('importPanel').classList.add('open');$('fileInfo').textContent='Файл ещё не выбран';$('addFile').disabled=true;pendingFile=null};
+$('closeImport').onclick=()=>$('importPanel').classList.remove('open');
+$('file').addEventListener('change',e=>{
+ const f=e.target.files&&e.target.files[0]; if(!f)return;
+ pendingFile=f; $('fileInfo').textContent='Выбран: '+f.name+' • '+Math.round(f.size/1024)+' KB'; $('addFile').disabled=false;
+});
+$('addFile').onclick=()=>{
+ if(!pendingFile)return;
+ addClip(pendingFile,'beat'); $('importPanel').classList.remove('open'); status('Бит добавлен на таймлайн');
+};
+
+$('play').onclick=async()=>{
+ if(!selected||!selected.audio){status('Сначала импортируй аудио');return}
+ audioInit(); const src=audioCtx.createBufferSource(); src.buffer=selected.audio; src.connect(master); src.start(); status('▶ Воспроизведение');
+};
+$('stop').onclick=()=>{if(audioCtx)audioCtx.suspend();status('■ Стоп')};
+
+$('record').onclick=async()=>{
+ if(mediaRec&&mediaRec.state==='recording'){mediaRec.stop();return}
+ try{
+  const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+  recChunks=[];mediaRec=new MediaRecorder(stream);
+  mediaRec.ondataavailable=e=>e.data.size&&recChunks.push(e.data);
+  mediaRec.onstop=()=>{stream.getTracks().forEach(t=>t.stop());const blob=new Blob(recChunks,{type:mediaRec.mimeType||'audio/webm'});const f=new File([blob],'Vocal '+new Date().toLocaleTimeString()+'.webm',{type:blob.type});addClip(f,'vocal');$('record').textContent='● REC';status('Вокал добавлен')};
+  mediaRec.start();$('record').textContent='■ STOP';status('🎙 Запись идёт...');
+ }catch(e){status('Разреши доступ к микрофону в Safari')}
+};
+
+document.querySelectorAll('.nav[data-panel]').forEach(b=>b.onclick=()=>{
+ document.querySelectorAll('.panel').forEach(p=>p.classList.remove('open'));
+ $(b.dataset.panel).classList.add('open');
+ document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));b.classList.add('active');
+});
+
+const notes=[261.63,293.66,329.63,349.23,392,440,493.88,523.25];
+notes.forEach((freq,i)=>{
+ const b=document.createElement('button');b.className='pad';b.textContent=['C','D','E','F','G','A','B','C'][i];$('pads').appendChild(b);
+ b.onpointerdown=()=>{audioInit();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.frequency.value=freq;g.gain.setValueAtTime(.0001,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.18,audioCtx.currentTime+.01);g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+.35);o.connect(g).connect(master);o.start();o.stop(audioCtx.currentTime+.36)}
+});
+
+$('save').onclick=()=>{localStorage.setItem('Kyw3llStudioV8Project',JSON.stringify({bpm:+$('bpm').value,clips:clips.map(c=>({name:c.file.name,type:c.type,left:c.el.style.left,width:c.el.style.width}))}));status('Проект сохранён на этом устройстве')};
+
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js').catch(()=>{});
+})();
+</script>
+</body>
+</html>
