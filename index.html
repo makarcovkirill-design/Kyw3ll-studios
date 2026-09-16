@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#0b0d11">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Kyw3ll Studio V9</title>
+<link rel="manifest" href="manifest.json">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:#090b0f;color:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input{font:inherit}button{color:inherit;border:0}.app{max-width:1000px;margin:auto;padding-bottom:95px}
+header{position:sticky;top:0;z-index:20;background:#101318ee;backdrop-filter:blur(18px);padding:12px;border-bottom:1px solid #292e37}
+.brand{font-size:20px;font-weight:900}.brand b{color:#9b6cff}
+.transport{display:flex;gap:8px;margin-top:10px;align-items:center}.btn{min-height:44px;padding:0 14px;border-radius:12px;background:#1a1e25;border:1px solid #303641;font-weight:800}.primary{background:#7137d9}.record{background:#a61b31}.bpm{margin-left:auto;border:1px solid #303641;background:#171a20;padding:5px 8px;border-radius:11px}.bpm input{width:48px;background:transparent;color:#fff;border:0;text-align:center}
+section{padding:14px}.title{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:#8f98a6;margin:4px 0 10px}
+.track{background:#11151a;border:1px solid #292f38;border-radius:16px;margin-bottom:10px;overflow:hidden}.head{display:flex;align-items:center;gap:9px;padding:10px 12px}.led{width:9px;height:9px;border-radius:50%;background:#8b5cf6}.name{font-weight:900;flex:1}.vol{width:95px}.lane{height:125px;position:relative;overflow:hidden;background:repeating-linear-gradient(90deg,#0f1217 0,#0f1217 49px,#181c22 50px)}.grid{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0,transparent 49px,#ffffff09 50px)}
+.clip{position:absolute;top:15px;height:92px;min-width:160px;border-radius:13px;padding:8px 10px;touch-action:none;user-select:none;background:linear-gradient(135deg,#6233c7,#3d35a8);border:1px solid #ad92ff}.clip.beat{background:linear-gradient(135deg,#087f78,#125e59);border-color:#42d9ca}.clip.vocal{background:linear-gradient(135deg,#bd2450,#7f1736);border-color:#fb7185}.clip.sel{outline:2px solid white;outline-offset:2px}.clip strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}.wave{width:100%;height:50px}
+.card{background:#11151a;border:1px solid #292f38;border-radius:16px;padding:14px;margin-bottom:10px}.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.control{background:#181c23;border-radius:12px;padding:11px}.control label{display:block;font-size:12px;color:#9ca3af;margin-bottom:6px}.control input{width:100%}input[type=range]{accent-color:#8b5cf6}
+.meter{height:12px;background:#1a1e25;border-radius:8px;overflow:hidden;margin:8px 0}.meter i{display:block;width:0;height:100%;background:#76e06f}.fxgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.fx{padding:13px;border-radius:12px;background:#191d24;border:1px solid #2b3039;font-weight:800;text-align:left}.fx.on{background:#422277;border-color:#9b6cff}
+.bottom{position:fixed;z-index:30;bottom:0;left:0;right:0;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:9px 10px calc(9px + env(safe-area-inset-bottom));background:#0f1217f2;border-top:1px solid #292e37;backdrop-filter:blur(18px)}.nav{min-height:48px;border-radius:12px;background:#181c23;border:1px solid #292f38;font-size:12px;font-weight:800}.nav.active{background:#302045;color:#cfc0ff}
+.panel{display:none}.panel.open{display:block}.hidden{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}.filebtn{display:flex;align-items:center;justify-content:center;min-height:52px;background:#7137d9;border-radius:14px;font-weight:900}.status{position:fixed;z-index:100;left:50%;bottom:78px;transform:translateX(-50%);display:none;background:#eee;color:#111;padding:10px 14px;border-radius:12px;font-weight:800;max-width:90%;text-align:center}.status.show{display:block}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+<div class="brand">Kyw3ll <b>Studio</b> <small>V9</small></div>
+<div class="transport">
+<button class="btn" id="stop">■</button><button class="btn primary" id="play">▶ Play</button><button class="btn record" id="rec">● REC</button>
+<div class="bpm">BPM <input id="bpm" type="number" value="120" min="40" max="240"></div>
+</div>
+</header>
+
+<section id="studio" class="panel open">
+<div class="title">Multitrack timeline</div>
+<div id="tracks"><div class="card" id="empty">Импортируй бит или запиши вокал.</div></div>
+</section>
+
+<section id="vocal" class="panel">
+<div class="title">Studio Rec</div>
+<div class="card">
+<h2>🎙️ Запись вокала</h2>
+<p style="color:#a1a1aa;font-size:13px">Исходник сохраняется чистым. Monitor FX можно включать отдельно.</p>
+<div class="meter"><i id="meter"></i></div>
+<div class="grid2">
+<div class="control"><label>Input Gain</label><input id="gain" type="range" min=".3" max="2" step=".01" value="1"></div>
+<div class="control"><label>Monitor Volume</label><input id="mon" type="range" min="0" max="1" step=".01" value=".7"></div>
+</div>
+<button class="btn" id="monitor" style="margin-top:10px;width:100%">🎧 Monitor FX: OFF</button>
+</div>
+<div class="card">
+<h2>Vocal FX</h2>
+<div class="fxgrid">
+<button class="fx" data-fx="autotune">✨ AutoTune</button><button class="fx" data-fx="compressor">🎚 Compressor</button>
+<button class="fx" data-fx="eq">🎛 EQ</button><button class="fx" data-fx="gate">🚪 Noise Gate</button>
+<button class="fx" data-fx="deesser">🎙 De-Esser</button><button class="fx" data-fx="reverb">🌌 Reverb</button>
+<button class="fx" data-fx="delay">🌀 Delay</button><button class="fx" data-fx="chorus">✨ Chorus</button>
+<button class="fx" data-fx="distortion">🔥 Distortion</button><button class="fx" data-fx="radio">📻 Radio</button>
+<button class="fx" data-fx="robot">🤖 Robot</button><button class="fx" data-fx="phaser">🌀 Phaser</button>
+<button class="fx" data-fx="stereo">↔ Stereo</button><button class="fx" data-fx="limiter">💎 Limiter</button>
+</div>
+</div>
+</section>
+
+<section id="mixer" class="panel">
+<div class="title">Mixer</div>
+<div class="card"><h2>Master</h2><div class="grid2"><div class="control"><label>Volume</label><input id="master" type="range" min="0" max="1" step=".01" value=".85"></div><div class="control"><label>Pan</label><input type="range" min="-1" max="1" value="0"></div></div></div>
+</section>
+</div>
+
+<div id="importBox" class="card" style="display:none;position:fixed;z-index:40;left:10px;right:10px;bottom:76px">
+<h2>📂 Импорт</h2><input id="file" class="hidden" type="file" accept="audio/*">
+<label for="file" class="filebtn">Выбрать аудиофайл</label>
+<p id="fileInfo" style="color:#a1a1aa;font-size:13px">Файл не выбран</p>
+<button id="add" class="btn primary" disabled style="width:100%">Добавить на BEAT</button>
+</div>
+
+<nav class="bottom">
+<button class="nav active" data-open="studio">🎚 Студия</button>
+<button class="nav" id="import">＋ Импорт</button>
+<button class="nav" data-open="vocal">🎙 Vocal</button>
+<button class="nav" data-open="mixer">🎛 Mixer</button>
+</nav>
+<div id="status" class="status"></div>
+
+<script>
+(()=>{const $=id=>document.getElementById(id);let ctx=null,master=null,tracks=[],selected=null,pending=null,playing=[],recorder=null,chunks=[],meterTimer=null,monitor=false;
+function say(t){let s=$('status');s.textContent=t;s.classList.add('show');clearTimeout(s.t);s.t=setTimeout(()=>s.classList.remove('show'),1800)}
+function init(){if(!ctx){ctx=new(window.AudioContext||window.webkitAudioContext)();master=ctx.createGain();master.gain.value=+$('master').value;master.connect(ctx.destination)}if(ctx.state==='suspended')ctx.resume()}
+$('master').oninput=e=>{init();master.gain.value=+e.target.value};
+function wave(cv,b){let c=cv.getContext('2d'),w=cv.width=cv.clientWidth*2,h=cv.height=cv.clientHeight*2,d=b.getChannelData(0),step=Math.max(1,Math.floor(d.length/w));c.clearRect(0,0,w,h);c.strokeStyle='#ffffffaa';c.beginPath();for(let x=0;x<w;x++){let m=0;for(let j=0;j<step;j++)m=Math.max(m,Math.abs(d[x*step+j]||0));let y=m*h*.43;c.moveTo(x,h/2-y);c.lineTo(x,h/2+y)}c.stroke()}
+async function decode(f){init();try{return await ctx.decodeAudioData(await f.arrayBuffer())}catch{return null}}
+function add(f,type){$('empty')?.remove();let tr=document.createElement('div');tr.className='track';let head=document.createElement('div');head.className='head';head.innerHTML='<span class="led"></span><span class="name"></span><input class="vol" type="range" min="0" max="1" step=".01" value=".85">';head.querySelector('.name').textContent=type==='beat'?'BEAT':'VOCAL';let lane=document.createElement('div');lane.className='lane';lane.innerHTML='<div class="grid"></div>';let cl=document.createElement('div');cl.className='clip '+type;cl.style.left='10px';cl.style.width='min(78vw,560px)';let strong=document.createElement('strong');strong.textContent=f.name;let cv=document.createElement('canvas');cv.className='wave';cl.append(strong,cv);lane.appendChild(cl);tr.append(head,lane);$('tracks').appendChild(tr);let o={f,type,cl,lane,buf:null,gain:head.querySelector('.vol'),startX:0,startL:0};tracks.push(o);selected=o;cl.addEventListener('pointerdown',e=>drag(e,o));decode(f).then(b=>{o.buf=b;if(b)wave(cv,b)});cl.classList.add('sel');return o}
+function drag(e,o){e.preventDefault();tracks.forEach(x=>x.cl.classList.remove('sel'));o.cl.classList.add('sel');selected=o;let sx=e.clientX,sl=parseFloat(o.cl.style.left)||0;const mv=x=>o.cl.style.left=Math.max(0,sl+x.clientX-sx)+'px';const up=()=>{o.cl.removeEventListener('pointermove',mv);o.cl.removeEventListener('pointerup',up)};o.cl.setPointerCapture?.(e.pointerId);o.cl.addEventListener('pointermove',mv);o.cl.addEventListener('pointerup',up)}
+$('import').onclick=()=>{$('importBox').style.display='block'};$('file').onchange=e=>{pending=e.target.files?.[0];if(pending){$('fileInfo').textContent=pending.name+' • '+Math.round(pending.size/1024)+' KB';$('add').disabled=false}};
+$('add').onclick=()=>{if(!pending)return;add(pending,'beat');$('importBox').style.display='none';say('Бит добавлен')};
+$('stop').onclick=()=>{playing.forEach(x=>{try{x.stop()}catch{}});playing=[];say('Стоп')};
+$('play').onclick=async()=>{init();if(!tracks.length){say('Сначала добавь бит или вокал');return}playing.forEach(x=>{try{x.stop()}catch{}});playing=[];let now=ctx.currentTime;tracks.forEach(o=>{if(!o.buf)return;let x=ctx.createBufferSource(),g=ctx.createGain();x.buffer=o.buf;g.gain.value=+o.gain.value;x.connect(g).connect(master);let delay=(parseFloat(o.cl.style.left)||0)/100;x.start(now+delay);playing.push(x)});say('▶ Весь проект играет')};
+$('rec').onclick=async()=>{if(recorder?.state==='recording'){recorder.stop();return}try{let st=await navigator.mediaDevices.getUserMedia({audio:true});recorder=new MediaRecorder(st);chunks=[];recorder.ondataavailable=e=>e.data.size&&chunks.push(e.data);recorder.onstop=()=>{st.getTracks().forEach(t=>t.stop());let b=new Blob(chunks,{type:recorder.mimeType||'audio/webm'}),f=new File([b],'Vocal '+new Date().toLocaleTimeString()+'.webm',{type:b.type});add(f,'vocal');$('rec').textContent='● REC';say('🎙 Вокал записан чистым')};recorder.start();$('rec').textContent='■ STOP';say('🎙 Запись идёт');}catch{say('Разреши микрофон для Safari')}};
+$('monitor').onclick=()=>{monitor=!monitor;$('monitor').textContent='🎧 Monitor FX: '+(monitor?'ON':'OFF')};
+document.querySelectorAll('.fx').forEach(b=>b.onclick=()=>{b.classList.toggle('on');say(b.classList.contains('on')?b.textContent+' включён':'Эффект выключен')});
+document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>{document.querySelectorAll('.panel').forEach(x=>x.classList.remove('open'));$(b.dataset.open).classList.add('open');document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));b.classList.add('active')});
+})();
+</script>
+</body></html>
